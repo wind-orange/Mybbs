@@ -14,5 +14,9 @@ const app = createApp(App);
 app.use(router);
 app.use(ElementPlus);
 app.config.globalProperties.VueCookies = VueCookies;
+// 顶部导航栏设置全局宽度
+app.config.globalProperties.globalInfo = {
+  bodyWidth: 1300,
+};
 
 app.mount("#app");
