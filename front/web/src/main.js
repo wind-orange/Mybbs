@@ -8,6 +8,8 @@ import App from "./App.vue";
 import router from "./router";
 
 import "@/assets/icon/iconfont.css";
+// 全局方法
+import Verify from "./utils/Verify";
 
 // 全局组件
 import Dialog from "./components/Dialog.vue";
@@ -21,6 +23,9 @@ app.config.globalProperties.VueCookies = VueCookies;
 app.config.globalProperties.globalInfo = {
   bodyWidth: 1300,
 };
+
+// 调用全局方法
+app.config.globalProperties.Verify = Verify;
 
 app.component("Dialog", Dialog);
 app.mount("#app");
