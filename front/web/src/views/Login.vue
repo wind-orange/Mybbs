@@ -33,7 +33,7 @@
             size="large"
             clearable
             placeholder="请输入密码"
-            v-model="formData.password"
+            v-model="formData.loginPassword"
             show-password
           >
             <template #prefix>
@@ -89,12 +89,12 @@
             </el-input>
           </el-form-item>
           <!-- register rePassword -->
-          <el-form-item prop="reRegiserPassword">
+          <el-form-item prop="reRegisterPassword">
             <el-input
               size="large"
               clearable
               placeholder="请再次输入密码"
-              v-model="formData.reRegiserPassword"
+              v-model="formData.reRegisterPassword"
               show-password
             >
               <template #prefix>
@@ -174,7 +174,7 @@ const dialogConfig = reactive({
   title: "标题",
 });
 // 对外方法
-// 0:注册 1:登录 2:找回密码
+// type: 0-注册 1-登录 2-找回密码
 const opType = ref();
 const showPanel = (type) => {
   opType.value = type;
@@ -182,11 +182,47 @@ const showPanel = (type) => {
 };
 defineExpose({ showPanel });
 
+// 验证码
+const checkCodeUrl = ref(api.checkCode);
+const changeCheckCode = (type) => {
+  checkCodeUrl.value =
+    api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
+};
+
+// 表单密码校验
+const checkRePassword = (rule, value, callback) => {
+  if (value !== formData.value.registerPassword) {
+    callback(new Error(rule.message));
+  } else {
+    callback();
+  }
+};
 // 表单配置
 const formData = ref({});
 const formDataRef = ref();
 const rules = {
-  title: [{ required: true, message: "请输入内容" }],
+  email: [
+    { required: true, message: "请输入邮箱" },
+    { validator: proxy.Verify.email, message: "请输入正确的邮箱" },
+  ],
+  loginPassword: [{ required: true, message: "请输入密码" }],
+  emailCode: [{ required: true, message: "请输入邮箱验证码" }],
+  nickName: [{ required: true, message: "请输入昵称" }],
+  registerPassword: [
+    { required: true, message: "请输入密码" },
+    {
+      validator: proxy.Verify.password,
+      message: "密码由8-18位的数字、字母、特殊字符组成",
+    },
+  ],
+  reRegisterPassword: [
+    { required: true, message: "请再次输入密码" },
+    {
+      validator: checkRePassword,
+      message: "两次输入的密码不一致",
+    },
+  ],
+  checkCode: [{ required: true, message: "请输入图片验证码" }],
 };
 
 // 表单重置
@@ -204,13 +240,6 @@ const resetForm = () => {
     formData.value = {}; // 手动清空表单数据
     formDataRef.value.resetFields();
   });
-};
-
-// 验证码
-const checkCodeUrl = ref(api.checkCode);
-const changeCheckCode = (type) => {
-  checkCodeUrl.value =
-    api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
 };
 </script>
 
