@@ -34,6 +34,7 @@
             clearable
             placeholder="请输入密码"
             v-model="formData.password"
+            show-password
           >
             <template #prefix>
               <span class="iconfont icon-password"></span>
@@ -49,7 +50,7 @@
                 size="large"
                 clearable
                 placeholder="请输入邮箱验证码"
-                v-model="formData.email"
+                v-model="formData.emailCode"
               >
                 <template #prefix>
                   <span class="iconfont icon-checkcode"></span>
@@ -80,6 +81,7 @@
               clearable
               placeholder="请输入密码"
               v-model="formData.registerPassword"
+              show-password
             >
               <template #prefix>
                 <span class="iconfont icon-password"></span>
@@ -93,6 +95,7 @@
               clearable
               placeholder="请再次输入密码"
               v-model="formData.reRegiserPassword"
+              show-password
             >
               <template #prefix>
                 <span class="iconfont icon-password"></span>
@@ -170,6 +173,14 @@ const dialogConfig = reactive({
   show: false,
   title: "标题",
 });
+// 对外方法
+// 0:注册 1:登录 2:找回密码
+const opType = ref();
+const showPanel = (type) => {
+  opType.value = type;
+  resetForm();
+};
+defineExpose({ showPanel });
 
 // 表单配置
 const formData = ref({});
@@ -178,27 +189,29 @@ const rules = {
   title: [{ required: true, message: "请输入内容" }],
 };
 
+// 表单重置
+const resetForm = () => {
+  dialogConfig.show = true;
+  if (opType.value == 0) {
+    dialogConfig.title = "注册";
+  } else if (opType.value == 1) {
+    dialogConfig.title = "登录";
+  } else if (opType.value == 2) {
+    dialogConfig.title = "重置密码";
+  }
+  nextTick(() => {
+    changeCheckCode(0);
+    formData.value = {}; // 手动清空表单数据
+    formDataRef.value.resetFields();
+  });
+};
+
 // 验证码
 const checkCodeUrl = ref(api.checkCode);
 const changeCheckCode = (type) => {
   checkCodeUrl.value =
     api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
 };
-// 对外方法
-// 0:注册 1:登录 2:找回密码
-const opType = ref();
-const showPanel = (type) => {
-  dialogConfig.show = true;
-  opType.value = type;
-  if (type === 0) {
-    dialogConfig.title = "注册";
-  } else if (type === 1) {
-    dialogConfig.title = "登录";
-  } else {
-    dialogConfig.title = "重置密码";
-  }
-};
-defineExpose({ showPanel });
 </script>
 
 <style lang="scss" scoped>
