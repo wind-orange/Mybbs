@@ -25,8 +25,8 @@
               <span class="iconfont icon-search"></span>
             </el-button>
             <el-button-group :style="{ 'margin-left': '10px' }">
-              <el-button type="primary" plain>登录</el-button>
-              <el-button type="primary" plain>注册</el-button>
+              <el-button type="primary" plain @click="login(1)">登录</el-button>
+              <el-button type="primary" plain @click="login(0)">注册</el-button>
             </el-button-group>
           </div>
         </div>
@@ -35,10 +35,13 @@
         <router-view />
       </div>
     </div>
+    <!-- 登录注册 -->
+    <Login ref="loginRef"></Login>
   </div>
 </template>
 
 <script setup>
+import Login from "@/views/Login.vue";
 import { ref, reactive, getCurrentInstance, nextTick } from "vue";
 const { proxy } = getCurrentInstance();
 
@@ -65,6 +68,13 @@ const logoInfo = ref([
     color: "#FD3224",
   },
 ]);
+
+// 登陆注册
+const loginRef = ref(null);
+const login = (type) => {
+  console.log("点击按钮",type)
+  loginRef.value.showPanel(type);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -89,8 +99,8 @@ const logoInfo = ref([
     .user-info-panel {
       width: 350px;
       display: flex;
-      .op-btn{
-        .iconfont{
+      .op-btn {
+        .iconfont {
           margin-left: 5px;
         }
       }
