@@ -1,8 +1,9 @@
 <template>
   <div>
+    <!-- 用v-model无法显示 -->
     <el-dialog
       class="cust-dialog"
-      :v-model="show"
+      :model-value="show"
       :show-close="showClose"
       :draggable="true"
       :close-on-click-modal="false"
