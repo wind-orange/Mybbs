@@ -26,12 +26,56 @@
             </template>
           </el-input>
         </el-form-item>
+        <!-- emailCode -->
+        <el-form-item prop="emailCode">
+          <div class="send-email-panel">
+            <el-input
+              size="large"
+              clearable
+              placeholder="请输入邮箱验证码"
+              v-model="formData.email"
+            >
+              <template #prefix>
+                <span class="iconfont icon-checkcode"></span>
+              </template>
+            </el-input>
+            <el-button class="send-email-btn" type="primary" size="large">
+              获取验证码
+            </el-button>
+          </div>
+        </el-form-item>
+        <!-- nickName -->
+        <el-form-item prop="nickName">
+          <el-input
+            size="large"
+            clearable
+            placeholder="请输入昵称"
+            v-model="formData.nickName"
+          >
+            <template #prefix>
+              <span class="iconfont icon-account"></span>
+            </template>
+          </el-input>
+        </el-form-item>
         <!-- password -->
         <el-form-item prop="password">
           <el-input
             size="large"
             clearable
             placeholder="请输入密码"
+            v-model="formData.password"
+          >
+            <template #prefix>
+              <span class="iconfont icon-password"></span>
+            </template>
+          </el-input>
+        </el-form-item>
+        <!-- rePassword -->
+        <el-form-item prop="rePassword">
+          <el-input
+            size="large"
+            clearable
+            placeholder="请再次输入密码"
             v-model="formData.password"
           >
             <template #prefix>
@@ -70,7 +114,7 @@
           </div>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="op-btn">登录</el-button>
+          <el-button class="op-btn" type="primary" size="large">登录</el-button>
         </el-form-item>
       </el-form>
     </Dialog>
@@ -116,6 +160,13 @@ defineExpose({ showPanel });
 
 <style lang="scss" scoped>
 .login-register {
+  .send-email-panel {
+    display: flex;
+    justify-content: space-between;
+    .send-email-btn {
+      margin-left: 5px;
+    }
+  }
   .check-code-panel {
     display: flex;
     .check-code {
@@ -131,7 +182,7 @@ defineExpose({ showPanel });
     display: flex;
     justify-content: space-between;
   }
-  .op-btn{
+  .op-btn {
     width: 100%;
   }
 }
