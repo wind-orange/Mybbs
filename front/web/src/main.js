@@ -9,6 +9,9 @@ import router from "./router";
 
 import "@/assets/icon/iconfont.css";
 
+// 全局组件
+import Dialog from "./components/Dialog.vue";
+
 const app = createApp(App);
 
 app.use(router);
@@ -19,4 +22,5 @@ app.config.globalProperties.globalInfo = {
   bodyWidth: 1300,
 };
 
+app.component("Dialog", Dialog);
 app.mount("#app");
