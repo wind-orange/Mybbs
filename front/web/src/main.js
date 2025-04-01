@@ -18,13 +18,15 @@ import Request from "./utils/Request";
 
 // 全局组件
 import Dialog from "./components/Dialog.vue";
+import Avatar from "./components/Avatar.vue";
 
 const app = createApp(App);
 app.use(router);
 app.use(ElementPlus);
-// 顶部导航栏设置全局宽度
+
 app.config.globalProperties.globalInfo = {
-  bodyWidth: 1300,
+  bodyWidth: 1300, // 顶部导航栏全局宽度
+  avatarUrl: "/file/getAvatar/", // 获取头像文件
 };
 
 // 调用全局方法
@@ -35,5 +37,6 @@ app.config.globalProperties.Request = Request;
 
 // 调用全局组件
 app.component("Dialog", Dialog);
+app.component("Avatar", Avatar);
 
 app.mount("#app");
