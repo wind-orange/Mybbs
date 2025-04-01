@@ -171,7 +171,12 @@
           </a>
         </el-form-item>
         <el-form-item>
-          <el-button class="op-btn" type="primary" size="large">
+          <el-button
+            class="op-btn"
+            type="primary"
+            size="large"
+            @click="submitForm()"
+          >
             <span v-if="opType == 0">注册</span>
             <span v-if="opType == 1">登录</span>
             <span v-if="opType == 2">重置密码</span>
@@ -224,6 +229,7 @@
 <script setup>
 import Dialog from "@/components/Dialog.vue";
 import { ref, reactive, getCurrentInstance, nextTick } from "vue";
+import md5 from "js-md5";
 const { proxy } = getCurrentInstance();
 // api
 const api = {
@@ -323,8 +329,15 @@ const resetForm = () => {
   }
   nextTick(() => {
     changeCheckCode(0);
-    formData.value = {}; // 手动清空表单数据
     formDataRef.value.resetFields();
+    formData.value = {}; // 手动清空表单数据
+    // rememberMe:登陆时如果cookie里有数据，粘贴回表单
+    if (opType.value == 1) {
+      const cookieLoginInfo = proxy.VueCookies.get("loginInfo");
+      if (cookieLoginInfo) {
+        formData.value = cookieLoginInfo;
+      }
+    }
   });
 };
 
@@ -363,15 +376,26 @@ const sendEmailCode = () => {
 // 提交表单
 const submitForm = () => {
   formDataRef.value.validate(async (valid) => {
-    if (!valid) return;
+    if (!valid) return; // 校验不通过
     let parmas = {};
     Object.assign(parmas, formData.value);
-    // 注册
+    // 统一参数，处理密码
     if (opType.value == 0 || opType.value == 2) {
       parmas.password = parmas.registerPassword;
       delete parmas.registerPassword;
       delete parmas.reRegisterPassword;
+    } else if (opType.value == 1) {
+      parmas.password = parmas.loginPassword;
+      delete parmas.loginPassword;
+      // md5密码校验转换
+      let cookieLoginInfo = proxy.VueCookies.get("loginInfo");
+      let cookiePassword =
+        cookieLoginInfo == null ? null : cookieLoginInfo.password;
+      if (parmas.password !== cookiePassword) {
+        parmas.password = md5(parmas.password);
+      }
     }
+    // 根据状态码调用api
     let url = null;
     if (opType.value == 0) {
       url = api.register;
@@ -388,12 +412,27 @@ const submitForm = () => {
       },
     });
     if (!result) return;
-    // 注册返回
     if (opType.value == 0) {
+      // 注册->登录
       proxy.Message.success("注册成功，请登录");
       showPanel(1);
     } else if (opType.value == 1) {
+      // rememberMe
+      if (parmas.rememberMe) {
+        const loginInfo = {
+          email: parmas.email,
+          password: parmas.password,
+          rememberMe: parmas.rememberMe,
+        };
+        proxy.VueCookies.set("loginInfo", loginInfo, "7d");
+      } else {
+        proxy.VueCookies.remove("loginInfo");
+      }
+      // 登录
+      dialogConfig.show = false;
+      proxy.Message.success("登录成功");
     } else if (opType.value == 2) {
+      // 重置密码->登录
       proxy.Message.success("密码重置成功，请登录");
       showPanel(1);
     }
