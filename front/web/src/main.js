@@ -10,6 +10,9 @@ import "element-plus/dist/index.css";
 import "@/assets/icon/iconfont.css";
 import "./assets/base.scss";
 
+// 状态管理
+import store from "./store";
+
 // 全局方法
 import VueCookies from "vue-cookies";
 import Verify from "./utils/Verify";
@@ -23,6 +26,7 @@ import Avatar from "./components/Avatar.vue";
 const app = createApp(App);
 app.use(router);
 app.use(ElementPlus);
+app.use(store);
 
 app.config.globalProperties.globalInfo = {
   bodyWidth: 1300, // 顶部导航栏全局宽度
