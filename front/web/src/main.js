@@ -10,6 +10,7 @@ import router from "./router";
 import "@/assets/icon/iconfont.css";
 // 全局方法
 import Verify from "./utils/Verify";
+import Message from "./utils/Message";
 
 // 全局组件
 import Dialog from "./components/Dialog.vue";
@@ -26,6 +27,7 @@ app.config.globalProperties.globalInfo = {
 
 // 调用全局方法
 app.config.globalProperties.Verify = Verify;
+app.config.globalProperties.Message = Message;
 
 app.component("Dialog", Dialog);
 app.mount("#app");
