@@ -229,6 +229,9 @@ const { proxy } = getCurrentInstance();
 const api = {
   checkCode: "/api/checkCode",
   sendEmailCode: "/sendEmailCode",
+  register: "/register",
+  login: "/login",
+  resetPwd: "/resetPwd",
 };
 // Dialog参数
 const dialogConfig = reactive({
@@ -344,7 +347,7 @@ const sendEmailCode = () => {
   emailFormDataRef.value.validate(async (valid) => {
     if (!valid) return;
     const parmas = Object.assign({}, emailFormData.value);
-    parmas.type = 0;
+    parmas.type = opType.value == 0 ? 0 : 1; // 0-注册 1-找回密码
     let result = await proxy.Request({
       url: api.sendEmailCode,
       parmas: parmas,
@@ -355,6 +358,45 @@ const sendEmailCode = () => {
     if (!result) return;
     proxy.Message.success("验证码发送成功，请登录邮箱查看");
     emailDialogConfig.show = false;
+  });
+};
+// 提交表单
+const submitForm = () => {
+  formDataRef.value.validate(async (valid) => {
+    if (!valid) return;
+    let parmas = {};
+    Object.assign(parmas, formData.value);
+    // 注册
+    if (opType.value == 0 || opType.value == 2) {
+      parmas.password = parmas.registerPassword;
+      delete parmas.registerPassword;
+      delete parmas.reRegisterPassword;
+    }
+    let url = null;
+    if (opType.value == 0) {
+      url = api.register;
+    } else if (opType.value == 1) {
+      url = api.login;
+    } else if (opType.value == 2) {
+      url = api.resetPwd;
+    }
+    let result = await proxy.Request({
+      url: url,
+      parmas: parmas,
+      errorCallback: () => {
+        changeCheckCode(0);
+      },
+    });
+    if (!result) return;
+    // 注册返回
+    if (opType.value == 0) {
+      proxy.Message.success("注册成功，请登录");
+      showPanel(1);
+    } else if (opType.value == 1) {
+    } else if (opType.value == 2) {
+      proxy.Message.success("密码重置成功，请登录");
+      showPanel(1);
+    }
   });
 };
 </script>
