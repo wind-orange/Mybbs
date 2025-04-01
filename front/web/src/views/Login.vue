@@ -56,10 +56,32 @@
                   <span class="iconfont icon-checkcode"></span>
                 </template>
               </el-input>
-              <el-button class="send-email-btn" type="primary" size="large">
+              <el-button
+                class="send-email-btn"
+                type="primary"
+                size="large"
+                @click="showEmailDialog()"
+              >
                 获取验证码
               </el-button>
             </div>
+            <el-popover placement="left" :width="500" trigger="click">
+              <div>
+                <p>1. 在垃圾箱中查找邮箱验证码</p>
+                <p>
+                  2. 在邮箱中【头像->设置->反垃圾->白名单->设置邮件地址白名单】
+                </p>
+                <p>3. 将邮箱添加到白名单</p>
+              </div>
+              <template #reference>
+                <span
+                  class="a-link tips"
+                  :style="{ 'font-size': '14px', cursor: 'pointer' }"
+                >
+                  未收到邮箱验证码？
+                </span>
+              </template>
+            </el-popover>
           </el-form-item>
           <!-- nickName -->
           <el-form-item prop="nickName" v-if="opType == 0">
@@ -157,6 +179,45 @@
         </el-form-item>
       </el-form>
     </Dialog>
+    <!-- send email code Dialog -->
+    <Dialog
+      :show="emailDialogConfig.show"
+      :title="emailDialogConfig.title"
+      :buttons="emailDialogConfig.buttons"
+      :showCancel="false"
+      width="500px"
+      @close="emailDialogConfig.show = false"
+    >
+      <el-form
+        :model="emailFormData"
+        :rules="rules"
+        ref="emailFormDataRef"
+        label-width="80px"
+      >
+        <el-form-item label="邮箱" prop="email">
+          {{ emailFormData.email }}
+        </el-form-item>
+        <el-form-item label="验证码" prop="checkCode">
+          <div class="check-code-panel">
+            <el-input
+              v-model="emailFormData.checkCode"
+              placeholder="请输入验证码"
+              size="large"
+              clearable
+            >
+              <template #prefix>
+                <span class="iconfont icon-checkcode"></span>
+              </template>
+            </el-input>
+            <img
+              :src="emailCheckCodeUrl"
+              class="check-code"
+              @click="changeCheckCode(1)"
+            />
+          </div>
+        </el-form-item>
+      </el-form>
+    </Dialog>
   </div>
 </template>
 
@@ -167,11 +228,25 @@ const { proxy } = getCurrentInstance();
 // api
 const api = {
   checkCode: "/api/checkCode",
+  sendEmailCode: "/sendEmailCode",
 };
 // Dialog参数
 const dialogConfig = reactive({
   show: false,
   title: "标题",
+});
+const emailDialogConfig = reactive({
+  show: false,
+  title: "邮箱验证码",
+  buttons: [
+    {
+      type: "primary",
+      text: "发送验证码",
+      click: () => {
+        sendEmailCode();
+      },
+    },
+  ],
 });
 // 对外方法
 // type: 0-注册 1-登录 2-找回密码
@@ -182,13 +257,24 @@ const showPanel = (type) => {
 };
 defineExpose({ showPanel });
 
-// 验证码
+// 获取验证码
 const checkCodeUrl = ref(api.checkCode);
+const emailCheckCodeUrl = ref(api.checkCode);
 const changeCheckCode = (type) => {
-  checkCodeUrl.value =
-    api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
+  if (type == 0) {
+    checkCodeUrl.value =
+      api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
+  } else {
+    emailCheckCodeUrl.value =
+      api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
+  }
 };
 
+// 表单配置
+const formData = ref({});
+const formDataRef = ref();
+const emailFormData = ref({});
+const emailFormDataRef = ref();
 // 表单密码校验
 const checkRePassword = (rule, value, callback) => {
   if (value !== formData.value.registerPassword) {
@@ -197,9 +283,7 @@ const checkRePassword = (rule, value, callback) => {
     callback();
   }
 };
-// 表单配置
-const formData = ref({});
-const formDataRef = ref();
+// 表单校验
 const rules = {
   email: [
     { required: true, message: "请输入邮箱" },
@@ -224,7 +308,6 @@ const rules = {
   ],
   checkCode: [{ required: true, message: "请输入图片验证码" }],
 };
-
 // 表单重置
 const resetForm = () => {
   dialogConfig.show = true;
@@ -241,6 +324,39 @@ const resetForm = () => {
     formDataRef.value.resetFields();
   });
 };
+
+// 获取邮箱验证码的点击事件
+const showEmailDialog = () => {
+  formDataRef.value.validateField("email", (valid) => {
+    if (!valid) return;
+    emailDialogConfig.show = true;
+    nextTick(() => {
+      changeCheckCode(1);
+      emailFormDataRef.value.resetFields();
+      emailFormData.value = {
+        email: formData.value.email,
+      };
+    });
+  });
+};
+// 发送邮件
+const sendEmailCode = () => {
+  emailFormDataRef.value.validate(async (valid) => {
+    if (!valid) return;
+    const parmas = Object.assign({}, emailFormData.value);
+    parmas.type = 0;
+    let result = await proxy.Request({
+      url: api.sendEmailCode,
+      parmas: parmas,
+      errorCallback: () => {
+        changeCheckCode(1);
+      },
+    });
+    if (!result) return;
+    proxy.Message.success("验证码发送成功，请登录邮箱查看");
+    emailDialogConfig.show = false;
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -250,13 +366,6 @@ const resetForm = () => {
     justify-content: space-between;
     .send-email-btn {
       margin-left: 5px;
-    }
-  }
-  .check-code-panel {
-    display: flex;
-    .check-code {
-      margin-left: 5px;
-      cursor: pointer;
     }
   }
   .rememberMe {
@@ -269,6 +378,13 @@ const resetForm = () => {
   }
   .op-btn {
     width: 100%;
+  }
+}
+.check-code-panel {
+  display: flex;
+  .check-code {
+    margin-left: 5px;
+    cursor: pointer;
   }
 }
 </style>
