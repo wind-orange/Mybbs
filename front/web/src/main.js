@@ -11,6 +11,7 @@ import "@/assets/icon/iconfont.css";
 // 全局方法
 import Verify from "./utils/Verify";
 import Message from "./utils/Message";
+import Request from "./utils/Requset";
 
 // 全局组件
 import Dialog from "./components/Dialog.vue";
@@ -28,6 +29,7 @@ app.config.globalProperties.globalInfo = {
 // 调用全局方法
 app.config.globalProperties.Verify = Verify;
 app.config.globalProperties.Message = Message;
-
+app.config.compilerOptions.Request = Request;
+// 调用全局组件
 app.component("Dialog", Dialog);
 app.mount("#app");
