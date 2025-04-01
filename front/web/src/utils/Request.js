@@ -2,6 +2,9 @@ import axios from "axios";
 import { ElLoading } from "element-plus";
 import Message from "./Message";
 
+const contentTypeForm = "application/x-www-urlencoded;charset=UTF-8";
+const contentTypeJson = "application/json";
+
 const instance = axios.create({
   baseURL: "/api",
   timeout: 10 * 1000,

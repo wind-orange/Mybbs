@@ -31,7 +31,7 @@ app.config.globalProperties.globalInfo = {
 app.config.globalProperties.VueCookies = VueCookies;
 app.config.globalProperties.Verify = Verify;
 app.config.globalProperties.Message = Message;
-app.config.compilerOptions.Request = Request;
+app.config.globalProperties.Request = Request;
 
 // 调用全局组件
 app.component("Dialog", Dialog);
