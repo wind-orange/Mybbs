@@ -36,6 +36,10 @@ const props = defineProps({
     type: Number,
     default: 60,
   },
+  height: {
+    type: Number,
+    default: 50,
+  },
   addLink: {
     type: Boolean,
     default: true,
@@ -49,4 +53,8 @@ const gotoUserCenter = () => {
 };
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.avatar {
+  cursor: pointer;
+}
+</style>
