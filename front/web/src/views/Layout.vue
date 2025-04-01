@@ -7,14 +7,15 @@
       >
         <!-- logo -->
         <router-link to="/" class="logo a-link">
-          <span v-for="item in logoInfo" :style="{ color: item.color }">{{
-            item.letter
-          }}</span>
+          <span v-for="item in logoInfo" :style="{ color: item.color }">
+            {{ item.letter }}
+          </span>
         </router-link>
         <!-- 板块信息 -->
         <div class="menu-panel"></div>
-        <!-- 登录、注册，用户信息 -->
+        <!-- 个人操作 -->
         <div class="user-info-panel">
+          <!-- 帖子相关操作 -->
           <div class="op-btn">
             <el-button type="primary">
               发帖
@@ -24,11 +25,44 @@
               搜索
               <span class="iconfont icon-search"></span>
             </el-button>
-            <el-button-group :style="{ 'margin-left': '10px' }">
-              <el-button type="primary" plain @click="login(1)">登录</el-button>
-              <el-button type="primary" plain @click="login(0)">注册</el-button>
-            </el-button-group>
           </div>
+          <!-- login scesess to userInfo -->
+          <template v-if="userInfo.userId">
+            <!-- 消息 -->
+            <div class="message-info">
+              <el-dropdown>
+                <el-badge class="item" :value="12">
+                  <div class="iconfont icon-message"></div>
+                </el-badge>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item>回复我的</el-dropdown-item>
+                    <el-dropdown-item>赞了我的文章</el-dropdown-item>
+                    <el-dropdown-item>下载了我的附件</el-dropdown-item>
+                    <el-dropdown-item>赞了我的评论</el-dropdown-item>
+                    <el-dropdown-item>系统消息</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+            <!-- 个人 -->
+            <div class="user-info">
+              <el-dropdown>
+                <Avatar :userId="userInfo.userId" :width="50"></Avatar>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item>我的主页</el-dropdown-item>
+                    <el-dropdown-item>退出</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+          </template>
+          <!-- login and register -->
+          <el-button-group :style="{ 'margin-left': '10px' }" v-else>
+            <el-button type="primary" plain @click="login(1)">登录</el-button>
+            <el-button type="primary" plain @click="login(0)">注册</el-button>
+          </el-button-group>
         </div>
       </div>
       <div>
@@ -42,8 +76,26 @@
 
 <script setup>
 import Login from "@/views/Login.vue";
-import { ref, reactive, getCurrentInstance, nextTick } from "vue";
+import {
+  ref,
+  reactive,
+  getCurrentInstance,
+  nextTick,
+  watch,
+  onMounted,
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useStore } from "vuex";
+
 const { proxy } = getCurrentInstance();
+const route = useRoute();
+const router = useRouter();
+const store = useStore();
+
+// api
+const api = {
+  getUserInfo: "/getUserInfo",
+};
 
 // logo字段
 const logoInfo = ref([
@@ -72,9 +124,37 @@ const logoInfo = ref([
 // 登陆注册
 const loginRef = ref(null);
 const login = (type) => {
-  console.log("点击按钮",type)
   loginRef.value.showPanel(type);
 };
+onMounted(() => {
+  getUserInfo();
+});
+
+// 从后台获取用户信息
+const getUserInfo = async () => {
+  let result = await proxy.Request({
+    url: api.getUserInfo,
+  });
+  if (!result) return;
+  if (!result.data) {
+    console.log("用户信息数据为空");
+    return;
+  }
+  store.commit("updateLoginUserInfo", result.data);
+};
+// 监听登录用户的信息
+const userInfo = ref({});
+watch(
+  () => store.state.loginUserInfo,
+  (newVal) => {
+    if (newVal != undefined && newVal != null) {
+      userInfo.value = newVal;
+    } else {
+      userInfo.value = {};
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -99,10 +179,20 @@ const login = (type) => {
     .user-info-panel {
       width: 350px;
       display: flex;
+      align-items: center;
       .op-btn {
         .iconfont {
           margin-left: 5px;
         }
+      }
+      .message-info {
+        .icon-message {
+          font-size: 25px;
+          color: rgb(147, 147, 147);
+        }
+        margin-left: 5px;
+        margin-right: 25px;
+        cursor: pointer;
       }
     }
   }

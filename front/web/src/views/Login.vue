@@ -227,10 +227,12 @@
 </template>
 
 <script setup>
-import Dialog from "@/components/Dialog.vue";
 import { ref, reactive, getCurrentInstance, nextTick } from "vue";
+import { useStore } from "vuex";
 import md5 from "js-md5";
+
 const { proxy } = getCurrentInstance();
+const store = useStore();
 // api
 const api = {
   checkCode: "/api/checkCode",
@@ -335,6 +337,7 @@ const resetForm = () => {
     if (opType.value == 1) {
       const cookieLoginInfo = proxy.VueCookies.get("loginInfo");
       if (cookieLoginInfo) {
+        cookieLoginInfo.loginPassword = cookieLoginInfo.password;
         formData.value = cookieLoginInfo;
       }
     }
@@ -430,6 +433,7 @@ const submitForm = () => {
       }
       // 登录
       dialogConfig.show = false;
+      store.commit("updateLoginUserInfo", result.data);
       proxy.Message.success("登录成功");
     } else if (opType.value == 2) {
       // 重置密码->登录
