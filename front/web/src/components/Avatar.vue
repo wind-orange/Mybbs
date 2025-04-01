@@ -1,11 +1,19 @@
 <template>
   <div
     class="avatar"
-    :style="{width:width+'px',height=height+'px','border-radius':width/2+'px'}"
+    :style="{
+      width: width + 'px',
+      height: height + 'px',
+      'border-radius': width / 2 + 'px',
+    }"
   >
     <el-image
       v-if="userId"
-      :style="{width:width+'px',height=height+'px','border-radius':width/2+'px'}"
+      :style="{
+        width: width + 'px',
+        height: height + 'px',
+        'border-radius': width / 2 + 'px',
+      }"
       :src="proxy.globalInfo.avatarUrl + userId"
       fit="scale-down"
       loading="lazy"
