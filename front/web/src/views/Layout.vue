@@ -155,6 +155,16 @@ watch(
   },
   { immediate: true, deep: true }
 );
+// 监听是否登录超时
+watch(
+  () => store.state.showLogin,
+  (newVal) => {
+    if (newVal) {
+      login(1);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

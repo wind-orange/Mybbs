@@ -1,6 +1,9 @@
 import axios from "axios";
-import { ElLoading } from "element-plus";
 import Message from "./Message";
+import { ElLoading } from "element-plus";
+import { useStore } from "vuex";
+
+const store = useStore();
 
 const contentTypeForm = "application/x-www-urlencoded;charset=UTF-8";
 const contentTypeJson = "application/json";
@@ -42,6 +45,8 @@ instance.interceptors.response.use(
     if ((responseData.code = 200)) {
       return responseData;
     } else if ((responseData.code = 901)) {
+      store.commit("showLogin", true); // 跳转登录框
+      store.commit("updateLoginUserInfo", null); // 清空登录信息
       return Promise.reject({ showError: false, msg: "登陆超时" });
     } else {
       if (errorCallback) {
